@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package casts_service;
+option go_package = "casts_service/v1/protos";
+
+
+message GetCastRequest {
+  int32 CastID = 1 [json_name="cast_id"];
+}
+
+message Cast {
+ repeated int32 Actors = 1[json_name="actors_ids"];
+}
+
+
+message UserErrorMessage { string message = 1 [ json_name = "message" ]; }
