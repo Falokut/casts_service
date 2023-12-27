@@ -45,24 +45,24 @@ func (r *postgreRepository) GetCast(ctx context.Context, id int32) (Cast, error)
 	span, ctx := opentracing.StartSpanFromContext(ctx, "postgreRepository.GetCast")
 	defer span.Finish()
 
-	query := fmt.Sprintf("SELECT id, array_agg(actor_id) AS actors_ids FROM %s WHERE id=$1 GROUP BY id", castTableName)
+	query := fmt.Sprintf("SELECT movie_id, array_agg(actor_id) AS actors_ids FROM %s WHERE movie_id=$1 GROUP BY movie_id", castTableName)
 
 	var actors string
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&id,&actors)
-	actors = strings.Trim(actors,"{}")
-	if errors.Is(err,sql.ErrNoRows) || strings.EqualFold(actors,"NULL"){
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&id, &actors)
+	actors = strings.Trim(actors, "{}")
+	if errors.Is(err, sql.ErrNoRows) || strings.EqualFold(actors, "NULL") {
 		return Cast{}, ErrNotFound
 	}
 	if err != nil {
 		return Cast{}, err
 	}
 
-	actorsIDs := strings.Split(actors,",")
-	ids := make([]int32, 0,len(actorsIDs))
+	actorsIDs := strings.Split(actors, ",")
+	ids := make([]int32, 0, len(actorsIDs))
 	for _, id := range actorsIDs {
-		actorID, err :=strconv.Atoi(id)
+		actorID, err := strconv.Atoi(id)
 		if err != nil {
-			return Cast{},err
+			return Cast{}, err
 		}
 		ids = append(ids, int32(actorID))
 	}

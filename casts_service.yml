@@ -15,7 +15,7 @@ services:
     volumes:
       - ./docker/containers-configs/:/configs
     ports:
-      - 9902:8080
+      - 9992:8080
     networks:
       - casts_service_network
       - casts_db_network
