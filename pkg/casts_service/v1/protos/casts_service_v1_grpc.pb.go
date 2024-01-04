@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CastsServiceV1Client interface {
 	GetCast(ctx context.Context, in *GetCastRequest, opts ...grpc.CallOption) (*Cast, error)
+	GetProfessions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Professions, error)
 }
 
 type castsServiceV1Client struct {
@@ -42,11 +44,21 @@ func (c *castsServiceV1Client) GetCast(ctx context.Context, in *GetCastRequest, 
 	return out, nil
 }
 
+func (c *castsServiceV1Client) GetProfessions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Professions, error) {
+	out := new(Professions)
+	err := c.cc.Invoke(ctx, "/casts_service.castsServiceV1/GetProfessions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CastsServiceV1Server is the server API for CastsServiceV1 service.
 // All implementations must embed UnimplementedCastsServiceV1Server
 // for forward compatibility
 type CastsServiceV1Server interface {
 	GetCast(context.Context, *GetCastRequest) (*Cast, error)
+	GetProfessions(context.Context, *emptypb.Empty) (*Professions, error)
 	mustEmbedUnimplementedCastsServiceV1Server()
 }
 
@@ -56,6 +68,9 @@ type UnimplementedCastsServiceV1Server struct {
 
 func (UnimplementedCastsServiceV1Server) GetCast(context.Context, *GetCastRequest) (*Cast, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCast not implemented")
+}
+func (UnimplementedCastsServiceV1Server) GetProfessions(context.Context, *emptypb.Empty) (*Professions, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProfessions not implemented")
 }
 func (UnimplementedCastsServiceV1Server) mustEmbedUnimplementedCastsServiceV1Server() {}
 
@@ -88,6 +103,24 @@ func _CastsServiceV1_GetCast_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CastsServiceV1_GetProfessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CastsServiceV1Server).GetProfessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/casts_service.castsServiceV1/GetProfessions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CastsServiceV1Server).GetProfessions(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CastsServiceV1_ServiceDesc is the grpc.ServiceDesc for CastsServiceV1 service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +131,10 @@ var CastsServiceV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCast",
 			Handler:    _CastsServiceV1_GetCast_Handler,
+		},
+		{
+			MethodName: "GetProfessions",
+			Handler:    _CastsServiceV1_GetProfessions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

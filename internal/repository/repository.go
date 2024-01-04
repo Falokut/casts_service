@@ -17,19 +17,37 @@ type DBConfig struct {
 	SSLMode  string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
 }
 
+type Actor struct {
+	ID             int32  `json:"id" db:"actor_id"`
+	ProfessionID   int32  `json:"profession_id" db:"profession_id"`
+	ProfessionName string `json:"profession_name" db:"profession_name"`
+}
+
+type Profession struct {
+	ID   int32  `json:"id" db:"id"`
+	Name string `json:"name" db:"name"`
+}
+
 type Cast struct {
-	Actors []int32 `db:"actors_ids" json:"actors_ids"`
+	Actors []Actor `db:"actors" json:"actors"`
 }
 
 type Manager interface {
-	GetCast(ctx context.Context, id int32) (Cast, error)
+	GetCast(ctx context.Context, id int32, selectProfessions []int32) (Cast, error)
+	GetProfessions(ctx context.Context) ([]Profession, error)
 }
 
 type CastRepository interface {
-	GetCast(ctx context.Context, id int32) (Cast, error)
+	GetCast(ctx context.Context, id int32, professionsIds []int32) (Cast, error)
+	GetProfessions(ctx context.Context) ([]Profession, error)
 }
 
 type CastCache interface {
-	CacheCast(ctx context.Context, cast Cast, id string, TTL time.Duration) error
+	CacheCast(ctx context.Context, cast Cast, id string, ttl time.Duration) error
 	GetCast(ctx context.Context, id int32) (Cast, error)
+}
+
+type ProfessionsCache interface {
+	GetProfessions(ctx context.Context) ([]Profession, error)
+	CacheProfessions(ctx context.Context, professions []Profession, ttl time.Duration) error
 }

@@ -6,11 +6,26 @@ option go_package = "casts_service/v1/protos";
 
 message GetCastRequest {
   int32 CastID = 1 [json_name="cast_id"];
+  // use , as separator. All professions will be selected for the empty professionsIDs
+  string professionsIDs = 2[json_name="professions_ids"];
+}
+
+
+message Actor {
+  int32 ID = 1[json_name="id"];
+  Profession profession = 2;
 }
 
 message Cast {
- repeated int32 Actors = 1[json_name="actors_ids"];
+ repeated Actor actors = 1;
+}
+message Profession {
+  int32 ID = 1[json_name="id"];
+  string name = 2;
 }
 
+message Professions {
+  repeated Profession professions = 1;
+}
 
 message UserErrorMessage { string message = 1 [ json_name = "message" ]; }

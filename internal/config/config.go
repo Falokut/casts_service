@@ -33,6 +33,14 @@ type Config struct {
 		CastTTL  time.Duration `yaml:"cast_ttl"`
 	} `yaml:"casts_cache"`
 
+	ProfessionsCache struct {
+		Network        string        `yaml:"network" env:"PROFESSIONS_CACHE_NETWORK"`
+		Addr           string        `yaml:"addr" env:"PROFESSIONS_CACHE_ADDR"`
+		Password       string        `yaml:"password" env:"PROFESSIONS_CACHE_PASSWORD"`
+		DB             int           `yaml:"db" env:"PROFESSIONS_CACHE_DB"`
+		ProfessionsTTL time.Duration `yaml:"professions_ttl"`
+	} `yaml:"professions_cache"`
+
 	DBConfig     repository.DBConfig `yaml:"db_config"`
 	JaegerConfig jaeger.Config       `yaml:"jaeger"`
 }

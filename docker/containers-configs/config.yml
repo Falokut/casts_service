@@ -31,3 +31,8 @@ casts_cache:
   db: 0
   cast_ttl: 30m
 
+professions_cache:
+  network: "tcp"
+  addr: "redis:6379"
+  db: 1
+  professions_ttl: 30m

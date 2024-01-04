@@ -60,8 +60,49 @@
             "required": false,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "professions_ids",
+            "description": "use , as separator. All professions will be selected for the empty professionsIDs",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
+        "tags": [
+          "castsServiceV1"
+        ]
+      }
+    },
+    "/v1/cast/professions": {
+      "get": {
+        "operationId": "castsServiceV1_GetProfessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/casts_serviceProfessions"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
         "tags": [
           "castsServiceV1"
         ]
@@ -69,14 +110,50 @@
     }
   },
   "definitions": {
+    "casts_serviceActor": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "profession": {
+          "$ref": "#/definitions/casts_serviceProfession"
+        }
+      }
+    },
     "casts_serviceCast": {
       "type": "object",
       "properties": {
-        "actors_ids": {
+        "actors": {
           "type": "array",
           "items": {
-            "type": "integer",
-            "format": "int32"
+            "type": "object",
+            "$ref": "#/definitions/casts_serviceActor"
+          }
+        }
+      }
+    },
+    "casts_serviceProfession": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "casts_serviceProfessions": {
+      "type": "object",
+      "properties": {
+        "professions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/casts_serviceProfession"
           }
         }
       }

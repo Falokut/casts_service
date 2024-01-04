@@ -65,15 +65,21 @@ func main() {
 	repo := repository.NewCastsRepository(database)
 	defer repo.Shutdown()
 
-	cache, err := repository.NewCastsCache(logger.Logger, getCacheOptions(appCfg))
+	castsCache, err := repository.NewCastsCache(logger.Logger, getCastsCacheOptions(appCfg))
 	if err != nil {
 		logger.Fatalf("Shutting down, connection to the cache is not established: %s", err.Error())
 	}
-	defer cache.Shutdown()
+	defer castsCache.Shutdown()
+
+	professionsCache, err := repository.NewProfessionsCache(logger.Logger, getProfessionsCacheOptions(appCfg))
+	if err != nil {
+		logger.Fatalf("Shutting down, connection to the cache is not established: %s", err.Error())
+	}
+	defer castsCache.Shutdown()
 
 	logger.Info("Healthcheck initializing")
 	healthcheckManager := healthcheck.NewHealthManager(logger.Logger,
-		[]healthcheck.HealthcheckResource{database, cache}, appCfg.HealthcheckPort, nil)
+		[]healthcheck.HealthcheckResource{database, castsCache}, appCfg.HealthcheckPort, nil)
 	go func() {
 		logger.Info("Healthcheck server running")
 		if err := healthcheckManager.RunHealthcheckEndpoint(); err != nil {
@@ -82,7 +88,7 @@ func main() {
 	}()
 
 	repoManager := repository.NewCastsRepositoryManager(logger.Logger, repo,
-		cache, appCfg.CastsCache.CastTTL, metric)
+		castsCache, appCfg.CastsCache.CastTTL, professionsCache, appCfg.ProfessionsCache.ProfessionsTTL, metric)
 	logger.Info("Service initializing")
 	service := service.NewCastsService(logger.Logger, repoManager)
 
@@ -115,11 +121,20 @@ func getListenServerConfig(cfg *config.Config) server.Config {
 	}
 }
 
-func getCacheOptions(cfg *config.Config) *redis.Options {
+func getCastsCacheOptions(cfg *config.Config) *redis.Options {
 	return &redis.Options{
 		Network:  cfg.CastsCache.Network,
 		Addr:     cfg.CastsCache.Addr,
 		Password: cfg.CastsCache.Password,
 		DB:       cfg.CastsCache.DB,
+	}
+}
+
+func getProfessionsCacheOptions(cfg *config.Config) *redis.Options {
+	return &redis.Options{
+		Network:  cfg.ProfessionsCache.Network,
+		Addr:     cfg.ProfessionsCache.Addr,
+		Password: cfg.ProfessionsCache.Password,
+		DB:       cfg.ProfessionsCache.DB,
 	}
 }

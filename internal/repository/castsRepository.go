@@ -2,11 +2,7 @@ package repository
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -18,7 +14,8 @@ type postgreRepository struct {
 }
 
 const (
-	castTableName = "casts"
+	castTableName        = "casts"
+	professionsTableName = "professions"
 )
 
 func NewCastsRepository(db *sqlx.DB) *postgreRepository {
@@ -41,30 +38,37 @@ func (r *postgreRepository) Shutdown() {
 	r.db.Close()
 }
 
-func (r *postgreRepository) GetCast(ctx context.Context, id int32) (Cast, error) {
+func (r *postgreRepository) GetCast(ctx context.Context, id int32, professionsIds []int32) (Cast, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "postgreRepository.GetCast")
 	defer span.Finish()
 
-	query := fmt.Sprintf("SELECT movie_id, array_agg(actor_id) AS actors_ids FROM %s WHERE movie_id=$1 GROUP BY movie_id", castTableName)
+	query := fmt.Sprintf("SELECT actor_id, profession_id, COALESCE(%[1]s.name,'') AS profession_name FROM %[2]s "+
+		"LEFT JOIN %[1]s ON profession_id=%[1]s.id WHERE movie_id=$1", professionsTableName, castTableName)
 
-	var actors string
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&id, &actors)
-	actors = strings.Trim(actors, "{}")
-	if errors.Is(err, sql.ErrNoRows) || strings.EqualFold(actors, "NULL") {
-		return Cast{}, ErrNotFound
+	var actors []Actor
+	var err error
+	if len(professionsIds) > 0 {
+		query += " AND profession_id=ANY($2)"
+		err = r.db.SelectContext(ctx, &actors, query, id, professionsIds)
+	} else {
+		err = r.db.SelectContext(ctx, &actors, query, id)
 	}
+
 	if err != nil {
 		return Cast{}, err
 	}
+	return Cast{Actors: actors}, nil
+}
 
-	actorsIDs := strings.Split(actors, ",")
-	ids := make([]int32, 0, len(actorsIDs))
-	for _, id := range actorsIDs {
-		actorID, err := strconv.Atoi(id)
-		if err != nil {
-			return Cast{}, err
-		}
-		ids = append(ids, int32(actorID))
+func (r *postgreRepository) GetProfessions(ctx context.Context) ([]Profession, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "postgreRepository.GetCast")
+	defer span.Finish()
+
+	query := fmt.Sprintf("SELECT * FROM %s ORDER BY id", professionsTableName)
+	var professions []Profession
+	err := r.db.SelectContext(ctx, &professions, query)
+	if err != nil {
+		return []Profession{}, err
 	}
-	return Cast{Actors: ids}, nil
+	return professions, nil
 }
