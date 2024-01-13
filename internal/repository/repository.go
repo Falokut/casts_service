@@ -17,8 +17,8 @@ type DBConfig struct {
 	SSLMode  string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
 }
 
-type Actor struct {
-	ID             int32  `json:"id" db:"actor_id"`
+type Person struct {
+	ID             int32  `json:"id" db:"person_id"`
 	ProfessionID   int32  `json:"profession_id" db:"profession_id"`
 	ProfessionName string `json:"profession_name" db:"profession_name"`
 }
@@ -29,7 +29,7 @@ type Profession struct {
 }
 
 type Cast struct {
-	Actors []Actor `db:"actors" json:"actors"`
+	Persons []Person `db:"persons" json:"persons"`
 }
 
 type Manager interface {

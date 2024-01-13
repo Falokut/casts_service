@@ -11,13 +11,13 @@ message GetCastRequest {
 }
 
 
-message Actor {
+message Person {
   int32 ID = 1[json_name="id"];
   Profession profession = 2;
 }
 
 message Cast {
- repeated Actor actors = 1;
+ repeated Person persons = 1;
 }
 message Profession {
   int32 ID = 1[json_name="id"];

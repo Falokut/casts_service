@@ -110,7 +110,19 @@
     }
   },
   "definitions": {
-    "casts_serviceActor": {
+    "casts_serviceCast": {
+      "type": "object",
+      "properties": {
+        "persons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/casts_servicePerson"
+          }
+        }
+      }
+    },
+    "casts_servicePerson": {
       "type": "object",
       "properties": {
         "id": {
@@ -119,18 +131,6 @@
         },
         "profession": {
           "$ref": "#/definitions/casts_serviceProfession"
-        }
-      }
-    },
-    "casts_serviceCast": {
-      "type": "object",
-      "properties": {
-        "actors": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/casts_serviceActor"
-          }
         }
       }
     },

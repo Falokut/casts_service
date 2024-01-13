@@ -52,9 +52,9 @@ func (s *CastsService) GetCast(ctx context.Context, in *casts_service.GetCastReq
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
-	var actors = make([]*casts_service.Actor, len(cast.Actors))
-	for i, actor := range cast.Actors {
-		actors[i] = &casts_service.Actor{
+	var actors = make([]*casts_service.Person, len(cast.Persons))
+	for i, actor := range cast.Persons {
+		actors[i] = &casts_service.Person{
 			Profession: &casts_service.Profession{
 				ID:   actor.ProfessionID,
 				Name: actor.ProfessionName,
@@ -63,7 +63,7 @@ func (s *CastsService) GetCast(ctx context.Context, in *casts_service.GetCastReq
 		}
 	}
 	span.SetTag("grpc.status", codes.OK)
-	return &casts_service.Cast{Actors: actors}, nil
+	return &casts_service.Cast{Persons: actors}, nil
 }
 
 func (s *CastsService) GetProfessions(ctx context.Context, in *emptypb.Empty) (*casts_service.Professions, error) {

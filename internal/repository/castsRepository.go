@@ -42,22 +42,22 @@ func (r *postgreRepository) GetCast(ctx context.Context, id int32, professionsId
 	span, ctx := opentracing.StartSpanFromContext(ctx, "postgreRepository.GetCast")
 	defer span.Finish()
 
-	query := fmt.Sprintf("SELECT actor_id, profession_id, COALESCE(%[1]s.name,'') AS profession_name FROM %[2]s "+
+	query := fmt.Sprintf("SELECT person_id, profession_id, COALESCE(%[1]s.name,'') AS profession_name FROM %[2]s "+
 		"LEFT JOIN %[1]s ON profession_id=%[1]s.id WHERE movie_id=$1", professionsTableName, castTableName)
 
-	var actors []Actor
+	var persons []Person
 	var err error
 	if len(professionsIds) > 0 {
 		query += " AND profession_id=ANY($2)"
-		err = r.db.SelectContext(ctx, &actors, query, id, professionsIds)
+		err = r.db.SelectContext(ctx, &persons, query, id, professionsIds)
 	} else {
-		err = r.db.SelectContext(ctx, &actors, query, id)
+		err = r.db.SelectContext(ctx, &persons, query, id)
 	}
 
 	if err != nil {
 		return Cast{}, err
 	}
-	return Cast{Actors: actors}, nil
+	return Cast{Persons: persons}, nil
 }
 
 func (r *postgreRepository) GetProfessions(ctx context.Context) ([]Profession, error) {
