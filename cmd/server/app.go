@@ -50,10 +50,12 @@ func main() {
 		return
 	}
 
+	shutdown := make(chan error, 1)
 	go func() {
 		logger.Info("Metrics server running")
 		if err := metrics.RunMetricServer(cfg.PrometheusConfig.ServerConfig); err != nil {
-			logger.Errorf("Shutting down, error while running metricsServer %v", err)
+			logger.Errorf("Shutting down, error while running metrics server %v", err)
+			shutdown <- err
 			return
 		}
 	}()
@@ -91,6 +93,7 @@ func main() {
 		logger.Info("Healthcheck server running")
 		if err := healthcheckManager.RunHealthcheckEndpoint(); err != nil {
 			logger.Errorf("Shutting down, error while running healthcheck endpoint %s", err.Error())
+			shutdown <- err
 			return
 		}
 	}()
@@ -99,15 +102,26 @@ func main() {
 		castsCache, cfg.CastsCache.CastTTL, professionsCache, cfg.ProfessionsCache.ProfessionsTTL, metric)
 	logger.Info("Service initializing")
 	service := service.NewCastsService(logger.Logger, repoManager)
-
 	logger.Info("Server initializing")
 	s := server.NewServer(logger.Logger, service)
-	s.Run(getListenServerConfig(cfg), metric, nil, nil)
+	go func() {
+		if err := s.Run(getListenServerConfig(cfg), metric, nil, nil); err != nil {
+			logger.Errorf("Shutting down, error while running server %s", err.Error())
+			shutdown <- err
+			return
+		}
+	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGHUP, syscall.SIGTERM)
 
-	<-quit
+	select {
+	case <-quit:
+		break
+	case <-shutdown:
+		break
+	}
+
 	s.Shutdown()
 }
 

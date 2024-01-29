@@ -11,6 +11,8 @@ github.com/Falokut/grpc_rest_server v1.0.3 h1:46lJ8Sddrzq6xyivOsfBSfO2MwccJdZOKL
 github.com/Falokut/grpc_rest_server v1.0.3/go.mod h1:sz3oLFL2hxQdF/h24/GTRDNzrRIXq/P7q+Vp+s0HvCQ=
 github.com/Falokut/grpc_rest_server v1.0.5 h1:mEWQpMo/61nU+/fDIJ7rlwmc6qh7ydomxAJ4S8S5cp8=
 github.com/Falokut/grpc_rest_server v1.0.5/go.mod h1:7mWQVyKxk3njgX2p3dY7qAKvtVzXckCKp07keUAJWHI=
+github.com/Falokut/grpc_rest_server v1.0.6 h1:RZN7YHIjNr+51fzMm5s2w+H0Yfmk9+tUE9r/B+8Xs7U=
+github.com/Falokut/grpc_rest_server v1.0.6/go.mod h1:7mWQVyKxk3njgX2p3dY7qAKvtVzXckCKp07keUAJWHI=
 github.com/Falokut/healthcheck v0.0.0-20231124155013-bff54f9bc002 h1:lnv8v7IvCnKxRbrWjINHOWHpZPpFDSqv0QFi8v1UM4E=
 github.com/Falokut/healthcheck v0.0.0-20231124155013-bff54f9bc002/go.mod h1:S4mxGDEYOzK4c5KgTs2tCSNovzu7lLaNSIPG4lX3a1w=
 github.com/Falokut/interceptors v1.0.3 h1:lRPEFpyF90tsIBVhYowAG90cUy8X04ODlSgokaQkSLI=
