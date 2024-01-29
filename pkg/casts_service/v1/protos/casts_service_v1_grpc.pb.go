@@ -23,7 +23,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CastsServiceV1Client interface {
+	// Returns cast with specified id.
 	GetCast(ctx context.Context, in *GetCastRequest, opts ...grpc.CallOption) (*Cast, error)
+	// Returns all professions.
 	GetProfessions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*Professions, error)
 }
 
@@ -57,7 +59,9 @@ func (c *castsServiceV1Client) GetProfessions(ctx context.Context, in *emptypb.E
 // All implementations must embed UnimplementedCastsServiceV1Server
 // for forward compatibility
 type CastsServiceV1Server interface {
+	// Returns cast with specified id.
 	GetCast(context.Context, *GetCastRequest) (*Cast, error)
+	// Returns all professions.
 	GetProfessions(context.Context, *emptypb.Empty) (*Professions, error)
 	mustEmbedUnimplementedCastsServiceV1Server()
 }

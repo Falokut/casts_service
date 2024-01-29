@@ -24,8 +24,44 @@
     "application/json"
   ],
   "paths": {
-    "/v1/cast": {
+    "/v1/cast/professions": {
       "get": {
+        "summary": "Returns all professions.",
+        "operationId": "castsServiceV1_GetProfessions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/casts_serviceProfessions"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "castsServiceV1"
+        ]
+      }
+    },
+    "/v1/cast/{cast_id}": {
+      "get": {
+        "summary": "Returns cast with specified id.",
         "operationId": "castsServiceV1_GetCast",
         "responses": {
           "200": {
@@ -56,8 +92,8 @@
         "parameters": [
           {
             "name": "cast_id",
-            "in": "query",
-            "required": false,
+            "in": "path",
+            "required": true,
             "type": "integer",
             "format": "int32"
           },
@@ -69,40 +105,6 @@
             "type": "string"
           }
         ],
-        "tags": [
-          "castsServiceV1"
-        ]
-      }
-    },
-    "/v1/cast/professions": {
-      "get": {
-        "operationId": "castsServiceV1_GetProfessions",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/casts_serviceProfessions"
-            }
-          },
-          "404": {
-            "description": "Returned when the resource does not exist.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          },
-          "500": {
-            "description": "Something went wrong.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
         "tags": [
           "castsServiceV1"
         ]

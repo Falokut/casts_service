@@ -48,12 +48,14 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service castsServiceV1 {
+	// Returns cast with specified id.
 	rpc GetCast(GetCastRequest) returns(Cast){
 		option (google.api.http) = {
-			get:"/v1/cast"
+			get:"/v1/cast/{CastID}"
 		};
 	}
 
+	// Returns all professions.
 	rpc GetProfessions(google.protobuf.Empty) returns(Professions) {
 		option (google.api.http) = {
 			get:"/v1/cast/professions"

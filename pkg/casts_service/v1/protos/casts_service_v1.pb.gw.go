@@ -33,12 +33,29 @@ var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
 var (
-	filter_CastsServiceV1_GetCast_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_CastsServiceV1_GetCast_0 = &utilities.DoubleArray{Encoding: map[string]int{"CastID": 0, "cast_id": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 )
 
 func request_CastsServiceV1_GetCast_0(ctx context.Context, marshaler runtime.Marshaler, client CastsServiceV1Client, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetCastRequest
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["CastID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "CastID")
+	}
+
+	protoReq.CastID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "CastID", err)
+	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -55,6 +72,23 @@ func request_CastsServiceV1_GetCast_0(ctx context.Context, marshaler runtime.Mar
 func local_request_CastsServiceV1_GetCast_0(ctx context.Context, marshaler runtime.Marshaler, server CastsServiceV1Server, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq GetCastRequest
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["CastID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "CastID")
+	}
+
+	protoReq.CastID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "CastID", err)
+	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -100,7 +134,7 @@ func RegisterCastsServiceV1HandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/casts_service.CastsServiceV1/GetCast", runtime.WithHTTPPathPattern("/v1/cast"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/casts_service.CastsServiceV1/GetCast", runtime.WithHTTPPathPattern("/v1/cast/{CastID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -189,7 +223,7 @@ func RegisterCastsServiceV1HandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/casts_service.CastsServiceV1/GetCast", runtime.WithHTTPPathPattern("/v1/cast"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/casts_service.CastsServiceV1/GetCast", runtime.WithHTTPPathPattern("/v1/cast/{CastID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -231,7 +265,7 @@ func RegisterCastsServiceV1HandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_CastsServiceV1_GetCast_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "cast"}, ""))
+	pattern_CastsServiceV1_GetCast_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "cast", "CastID"}, ""))
 
 	pattern_CastsServiceV1_GetProfessions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "cast", "professions"}, ""))
 )
