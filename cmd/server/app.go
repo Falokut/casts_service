@@ -9,7 +9,12 @@ import (
 
 	"github.com/Falokut/casts_service/internal/config"
 	"github.com/Falokut/casts_service/internal/repository"
+	"github.com/Falokut/casts_service/internal/repository/postgresrepository"
+	"github.com/Falokut/casts_service/internal/repository/rediscache"
+
+	"github.com/Falokut/casts_service/internal/handler"
 	"github.com/Falokut/casts_service/internal/service"
+
 	casts_service "github.com/Falokut/casts_service/pkg/casts_service/v1/protos"
 	jaegerTracer "github.com/Falokut/casts_service/pkg/jaeger"
 	"github.com/Falokut/casts_service/pkg/metrics"
@@ -53,33 +58,33 @@ func main() {
 	shutdown := make(chan error, 1)
 	go func() {
 		logger.Info("Metrics server running")
-		if err := metrics.RunMetricServer(cfg.PrometheusConfig.ServerConfig); err != nil {
-			logger.Errorf("Shutting down, error while running metrics server %v", err)
-			shutdown <- err
+		if serr := metrics.RunMetricServer(cfg.PrometheusConfig.ServerConfig); serr != nil {
+			logger.Errorf("Shutting down, error while running metrics server %v", serr)
+			shutdown <- serr
 			return
 		}
 	}()
 
 	logger.Info("Database initializing")
-	database, err := repository.NewPostgreDB(cfg.DBConfig)
+	database, err := postgresrepository.NewPostgreDB(&cfg.DBConfig)
 	if err != nil {
 		logger.Errorf("Shutting down, connection to the database is not established: %s", err.Error())
 		return
 	}
 
 	logger.Info("Repository initializing")
-	repo := repository.NewCastsRepository(database)
+	repo := postgresrepository.NewCastsRepository(database, logger.Logger)
 	defer repo.Shutdown()
 
-	castsCache, err := repository.NewCastsCache(logger.Logger, getCastsCacheOptions(cfg))
+	castsCache, err := rediscache.NewCastsCache(logger.Logger, getCastsCacheOptions(cfg), metric)
 	if err != nil {
 		logger.Errorf("Shutting down, connection to the cache is not established: %s", err.Error())
 		return
 	}
 	defer castsCache.Shutdown()
 
-	professionsCache, err := repository.NewProfessionsCache(logger.Logger,
-		getProfessionsCacheOptions(cfg))
+	professionsCache, err := rediscache.NewProfessionsCache(logger.Logger,
+		getProfessionsCacheOptions(cfg), metric)
 	if err != nil {
 		logger.Errorf("Shutting down, connection to the professions cache is not established: %s", err.Error())
 		return
@@ -94,18 +99,25 @@ func main() {
 		if err := healthcheckManager.RunHealthcheckEndpoint(); err != nil {
 			logger.Errorf("Shutting down, error while running healthcheck endpoint %s", err.Error())
 			shutdown <- err
-			return
 		}
 	}()
 
-	repoManager := repository.NewCastsRepositoryManager(logger.Logger, repo,
-		castsCache, cfg.CastsCache.CastTTL, professionsCache, cfg.ProfessionsCache.ProfessionsTTL, metric)
+	repoManager := repository.NewCastsRepository(
+		logger.Logger,
+		repo,
+		castsCache,
+		cfg.CastsCache.CastTTL,
+		professionsCache,
+		cfg.ProfessionsCache.ProfessionsTTL)
 	logger.Info("Service initializing")
-	service := service.NewCastsService(logger.Logger, repoManager)
+	s := service.NewCastsService(logger.Logger, repoManager)
+	logger.Info("Handler initializing")
+	h := handler.NewCastsServiceHandler(s)
+
 	logger.Info("Server initializing")
-	s := server.NewServer(logger.Logger, service)
+	serv := server.NewServer(logger.Logger, h)
 	go func() {
-		if err := s.Run(getListenServerConfig(cfg), metric, nil, nil); err != nil {
+		if err := serv.Run(getListenServerConfig(cfg), metric, nil, nil); err != nil {
 			logger.Errorf("Shutting down, error while running server %s", err.Error())
 			shutdown <- err
 			return
@@ -122,7 +134,7 @@ func main() {
 		break
 	}
 
-	s.Shutdown()
+	serv.Shutdown()
 }
 
 func getListenServerConfig(cfg *config.Config) server.Config {
@@ -137,8 +149,7 @@ func getListenServerConfig(cfg *config.Config) server.Config {
 				return errors.New("can't convert")
 			}
 
-			return casts_service.RegisterCastsServiceV1HandlerServer(context.Background(),
-				mux, serv)
+			return casts_service.RegisterCastsServiceV1HandlerServer(ctx, mux, serv)
 		},
 	}
 }

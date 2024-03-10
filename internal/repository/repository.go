@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"time"
-)
 
-var ErrNotFound = errors.New("entity not found")
+	"github.com/Falokut/casts_service/internal/models"
+	"github.com/sirupsen/logrus"
+)
 
 type DBConfig struct {
 	Host     string `yaml:"host" env:"DB_HOST"`
@@ -17,37 +18,85 @@ type DBConfig struct {
 	SSLMode  string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
 }
 
-type Person struct {
-	ID             int32  `json:"id" db:"person_id"`
-	ProfessionID   int32  `json:"profession_id" db:"profession_id"`
-	ProfessionName string `json:"profession_name" db:"profession_name"`
-}
-
-type Profession struct {
-	ID   int32  `json:"id" db:"id"`
-	Name string `json:"name" db:"name"`
-}
-
-type Cast struct {
-	Persons []Person `db:"persons" json:"persons"`
-}
-
-type Manager interface {
-	GetCast(ctx context.Context, id int32, selectProfessions []int32) (Cast, error)
-	GetProfessions(ctx context.Context) ([]Profession, error)
-}
-
 type CastRepository interface {
-	GetCast(ctx context.Context, id int32, professionsIds []int32) (Cast, error)
-	GetProfessions(ctx context.Context) ([]Profession, error)
+	GetCast(ctx context.Context, id int32, professionsIds []int32) (models.Cast, error)
+	GetProfessions(ctx context.Context) ([]models.Profession, error)
 }
 
 type CastCache interface {
-	CacheCast(ctx context.Context, cast Cast, id string, ttl time.Duration) error
-	GetCast(ctx context.Context, id int32) (Cast, error)
+	CacheCast(ctx context.Context, cast models.Cast, id string, ttl time.Duration) error
+	GetCast(ctx context.Context, id int32) (models.Cast, error)
 }
 
 type ProfessionsCache interface {
-	GetProfessions(ctx context.Context) ([]Profession, error)
-	CacheProfessions(ctx context.Context, professions []Profession, ttl time.Duration) error
+	GetProfessions(ctx context.Context) ([]models.Profession, error)
+	CacheProfessions(ctx context.Context, professions []models.Profession, ttl time.Duration) error
+}
+
+type castRepository struct {
+	logger           *logrus.Logger
+	repo             CastRepository
+	castsCache       CastCache
+	professionsCache ProfessionsCache
+	castTTL          time.Duration
+	professionsTTL   time.Duration
+}
+
+func NewCastsRepository(
+	logger *logrus.Logger,
+	repo CastRepository,
+	castsCache CastCache,
+	castTTL time.Duration,
+	professionsCache ProfessionsCache,
+	professionsTTL time.Duration) *castRepository {
+	return &castRepository{
+		logger:           logger,
+		repo:             repo,
+		castsCache:       castsCache,
+		castTTL:          castTTL,
+		professionsCache: professionsCache,
+		professionsTTL:   professionsTTL,
+	}
+}
+
+func (m *castRepository) GetCast(ctx context.Context, id int32, s []int32) (cast models.Cast, err error) {
+	cast, err = m.castsCache.GetCast(ctx, id)
+	if err == nil {
+		return cast, nil
+	}
+
+	cast, err = m.repo.GetCast(ctx, id, s)
+	if err != nil {
+		return
+	}
+
+	go func() {
+		m.logger.Info("Caching cast")
+		if err := m.castsCache.CacheCast(context.Background(), cast, fmt.Sprint(id), m.castTTL); err != nil {
+			m.logger.Error(err)
+		}
+	}()
+
+	return cast, nil
+}
+
+func (m *castRepository) GetProfessions(ctx context.Context) (professions []models.Profession, err error) {
+	professions, err = m.professionsCache.GetProfessions(ctx)
+	if err == nil {
+		return professions, nil
+	}
+
+	professions, err = m.repo.GetProfessions(ctx)
+	if err != nil {
+		return
+	}
+
+	go func() {
+		m.logger.Info("Caching professions")
+		if err := m.professionsCache.CacheProfessions(context.Background(), professions, m.professionsTTL); err != nil {
+			m.logger.Error(err)
+		}
+	}()
+
+	return professions, nil
 }
