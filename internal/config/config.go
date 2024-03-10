@@ -6,8 +6,8 @@ import (
 
 	"github.com/Falokut/casts_service/internal/repository"
 	"github.com/Falokut/casts_service/pkg/jaeger"
+	"github.com/Falokut/casts_service/pkg/logging"
 	"github.com/Falokut/casts_service/pkg/metrics"
-	logging "github.com/Falokut/online_cinema_ticket_office.loggerwrapper"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 

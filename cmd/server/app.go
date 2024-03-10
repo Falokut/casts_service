@@ -17,10 +17,10 @@ import (
 
 	casts_service "github.com/Falokut/casts_service/pkg/casts_service/v1/protos"
 	jaegerTracer "github.com/Falokut/casts_service/pkg/jaeger"
+	"github.com/Falokut/casts_service/pkg/logging"
 	"github.com/Falokut/casts_service/pkg/metrics"
 	server "github.com/Falokut/grpc_rest_server"
 	"github.com/Falokut/healthcheck"
-	logging "github.com/Falokut/online_cinema_ticket_office.loggerwrapper"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/opentracing/opentracing-go"
 	"github.com/redis/go-redis/v9"

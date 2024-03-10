@@ -5,7 +5,6 @@ go 1.22.0
 require (
 	github.com/Falokut/grpc_rest_server v1.0.9
 	github.com/Falokut/healthcheck v0.0.0-20231124155013-bff54f9bc002
-	github.com/Falokut/online_cinema_ticket_office.loggerwrapper v0.0.0-20231130151717-09aa21496f83
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.5.5
